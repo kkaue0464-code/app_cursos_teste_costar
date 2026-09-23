@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sindicato Noir - Academia de Tecnologia & Investigação de Código</title>
+    
+    <!-- Google Fonts: Special Elite (Typewriter), Playfair Display (Noir Title), Inter (Body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        noir: {
+                            black: '#040303',
+                            onyx: '#0b0d0c',
+                            'onyx-2': '#121615',
+                            carbon: '#161b1a',
+                            'carbon-2': '#19201e',
+                            jet: '#1f2926',
+                            charcoal: '#2d3c37',
+                            gold: '#d4af37',
+                            'gold-dark': '#a68223',
+                            brass: '#c5a059',
+                            cream: '#f4efe6'
+                        }
+                    },
+                    fontFamily: {
+                        typewriter: ['"Special Elite"', 'cursive', 'monospace'],
+                        noirTitle: ['"Playfair Display"', 'serif'],
+                        sans: ['Inter', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.67)',
+                        'gold-glow': '0 0 20px rgba(212, 175, 55, 0.25)',
+                        'gold-glow-lg': '0 0 35px rgba(212, 175, 55, 0.45)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #040303;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2d3c37;
+            border-radius: 4px;
+            border: 1px solid #d4af37;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d4af37;
+        }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(18, 22, 21, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(197, 160, 89, 0.2);
+        }
+        
+        .glass-panel-interactive {
+            background: rgba(22, 27, 26, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-panel-interactive:hover {
+            border-color: rgba(212, 175, 55, 0.7);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px -10px rgba(212, 175, 55, 0.2);
+        }
+
+        /* Crime Scene Tape Banner Effects */
+        .police-tape {
+            background: #d4af37;
+            color: #040303;
+            font-family: 'Special Elite', cursive;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background-image: repeating-linear-gradient(
+                -45deg,
+                #040303,
+                #040303 15px,
+                #d4af37 15px,
+                #d4af37 35px
+            );
+        }
+
+        .police-tape-text {
+            background: #d4af37;
+            color: #040303;
+            padding: 4px 12px;
+        }
+
+        /* Canvas background overlay */
+        #three-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Vignette FX overlay */
+        .vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            box-shadow: inset 0 0 150px rgba(4, 3, 3, 0.85);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Custom Stamp CSS */
+        .stamp-approved {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            text-transform: uppercase;
+            font-family: 'Special Elite', cursive;
+            font-weight: bold;
+            border: 2px dashed #d4af37;
+            color: #d4af37;
+            border-radius: 4px;
+            transform: rotate(-3deg);
+        }
+
+        /* Typewriter Cursor */
+        .typewriter-cursor::after {
+            content: '|';
+            animation: blink 0.8s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body class="bg-noir-black text-noir-cream font-sans antialiased selection:bg-noir-gold selection:text-noir-black min-h-screen overflow-x-hidden relative">
+
+    <!-- Ambient 3D Fog & Particle Canvas -->
+    <canvas id="three-canvas"></canvas>
+    
+    <!-- Film Noir Vignette Overlay -->
+    <div class="vignette"></div>
+
+    <!-- Header Semântico -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-noir-gold/20 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            
+            <!-- Logo Sindicato -->
+            <a href="#agencia" class="flex items-center gap-3 group">
+                <div class="w-12 h-12 rounded-full border-2 border-noir-gold bg-noir-onyx flex items-center justify-center shadow-gold-glow group-hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-user-secret text-2xl text-noir-gold"></i>
+                </div>
+                <div>
+                    <span class="font-noirTitle text-xl sm:text-2xl font-bold tracking-wider text-noir-cream group-hover:text-noir-gold transition-colors block leading-tight">
+                        SINDICATO NOIR
+                    </span>
+                    <span class="font-typewriter text-xs text-noir-gold/80 tracking-widest uppercase block">
+                        Escola de Detetives Tech
+                    </span>
+                </div>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center space-x-6 font-typewriter text-sm tracking-wide">
+                <a href="#agencia" class="hover:text-noir-gold transition-colors py-1 border-b-2 border-transparent hover:border-noir-gold">Agência</a>
+                <a href="#dossies" class="hover:text-noir-gold transition-colors py-1 border-b-2 border-transparent hover:border-noir-gold">Dossiês de Cursos</a>
+                <a href="#calculadora" class="hover:text-noir-gold transition-colors py-1 border-b-2 border-transparent hover:border-noir-gold">Calculadora de Treino</a>
+                <a href="#interrogatorio" class="hover:text-noir-gold transition-colors py-1 border-b-2 border-transparent hover:border-noir-gold">Inscrição</a>
+                <a href="#faq" class="hover:text-noir-gold transition-colors py-1 border-b-2 border-transparent hover:border-noir-gold">FAQ</a>
+            </nav>
+
+            <!-- Audio Toggle & Caso Cart Button -->
+            <div class="flex items-center gap-3">
+                <!-- Web Audio Sound FX Toggle -->
+                <button id="sound-toggle-btn" onclick="toggleAudio()" class="p-2.5 rounded-lg border border-noir-gold/30 hover:border-noir-gold bg-noir-onyx/80 text-noir-gold transition-all" title="Efeitos de Som de Máquina de Escrever">
+                    <i id="sound-icon" class="fa-solid fa-volume-high text-lg"></i>
+                </button>
+
+                <!-- Case File Basket Drawer Toggle -->
+                <button onclick="toggleCaseDrawer()" class="relative flex items-center gap-2 px-4 py-2 rounded-lg bg-noir-gold hover:bg-noir-brass text-noir-black font-typewriter font-bold text-sm transition-all shadow-gold-glow">
+                    <i class="fa-solid fa-folder-closed"></i>
+                    <span class="hidden sm:inline">Caso Selecionado</span>
+                    <span id="cart-count-badge" class="w-5 h-5 rounded-full bg-noir-black text-noir-gold text-xs flex items-center justify-center font-sans font-bold">0</span>
+                </button>
+
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-noir-gold hover:text-white focus:outline-none">
+                    <i class="fa-solid fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="hidden md:hidden glass-panel border-t border-noir-gold/20 px-4 pt-3 pb-6 space-y-3 font-typewriter text-center">
+            <a href="#agencia" onclick="toggleMobileMenu()" class="block py-2 hover:text-noir-gold border-b border-noir-charcoal/40">Agência</a>
+            <a href="#dossies" onclick="toggleMobileMenu()" class="block py-2 hover:text-noir-gold border-b border-noir-charcoal/40">Dossiês de Cursos</a>
+            <a href="#calculadora" onclick="toggleMobileMenu()" class="block py-2 hover:text-noir-gold border-b border-noir-charcoal/40">Calculadora de Treino</a>
+            <a href="#interrogatorio" onclick="toggleMobileMenu()" class="block py-2 hover:text-noir-gold border-b border-noir-charcoal/40">Inscrição</a>
+            <a href="#faq" onclick="toggleMobileMenu()" class="block py-2 hover:text-noir-gold">FAQ Cadetes</a>
+        </div>
+    </header>
+
+    <div class="relative z-10 w-full police-tape py-1.5 overflow-hidden shadow-lg">
+        <div class="whitespace-nowrap flex gap-8 animate-pulse text-xs sm:text-sm font-bold justify-center items-center">
+            <span class="police-tape-text">★ ACADEMIA NOIR DE PROGRAMAÇÃO ★</span>
+            <span class="police-tape-text hidden md:inline">DESVENDANDO ALGORITMOS DESDE 1930</span>
+            <span class="police-tape-text">ALERTA: VAGAS LIMITADAS PARA NOVOS DETETIVES TECH</span>
+            <span class="police-tape-text hidden lg:inline">CÓDIGO LIMPO É CÓDIGO SEM PISTAS</span>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-24 py-12">
+
+        <!-- SECTION 1: AGÊNCIA / HERO -->
+        <section id="agencia" class="min-h-[80vh] flex flex-col justify-center items-center text-center relative pt-8">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-panel border border-noir-gold/40 mb-6 animate-bounce">
+                <span class="w-2 h-2 rounded-full bg-noir-gold animate-ping"></span>
+                <span class="font-typewriter text-xs text-noir-gold tracking-widest uppercase">Investigação Tecnológica Aberta</span>
+            </div>
+
+            <h1 class="font-noirTitle text-4xl sm:text-6xl md:text-7xl font-black text-noir-cream tracking-tight max-w-4xl leading-tight mb-6 drop-shadow-lg">
+                Desvende os Mistérios do Código na <span class="text-transparent bg-clip-text bg-gradient-to-r from-noir-gold via-yellow-200 to-noir-brass">Sombra dos Algoritmos</span>
+            </h1>
+
+            <p class="font-typewriter text-noir-cream/80 text-base sm:text-lg max-w-2xl mb-10 leading-relaxed">
+                Bem-vindo ao escritório, recruta. Aqui não investigamos crimes comuns, mas sim a arquitetura oculta da Web, a lógica do Python e as fortalezas dos Bancos de Dados. Você tem o que é preciso para ser um detetive do código?
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                <a href="#dossies" class="px-8 py-4 rounded-xl bg-gradient-to-r from-noir-gold to-noir-brass text-noir-black font-typewriter font-bold text-base shadow-gold-glow hover:shadow-gold-glow-lg hover:scale-105 transition-all flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    Examinar Dossiês de Cursos
+                </a>
+                <a href="#interrogatorio" class="px-8 py-4 rounded-xl glass-panel text-noir-gold border border-noir-gold/40 hover:border-noir-gold font-typewriter font-bold text-base hover:bg-noir-onyx transition-all flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-feather-pointed"></i>
+                    Iniciar Interrogatório
+                </a>
+            </div>
+
+            <!-- Stats Badge Bar -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-4xl mt-16 text-left">
+                <div class="glass-panel p-4 rounded-xl border border-noir-gold/20">
+                    <div class="font-typewriter text-xs text-noir-gold">Taxa de Resolução</div>
+                    <div class="font-noirTitle text-2xl font-bold text-white">100% Casos Fechados</div>
+                    <p class="text-xs text-noir-cream/60 mt-1">Alunos no mercado tech</p>
+                </div>
+                <div class="glass-panel p-4 rounded-xl border border-noir-gold/20">
+                    <div class="font-typewriter text-xs text-noir-gold">Carga Horária Total</div>
+                    <div class="font-noirTitle text-2xl font-bold text-white">380 Horas</div>
+                    <p class="text-xs text-noir-cream/60 mt-1">Prática investigativa</p>
+                </div>
+                <div class="glass-panel p-4 rounded-xl border border-noir-gold/20">
+                    <div class="font-typewriter text-xs text-noir-gold">Níveis de Investigação</div>
+                    <div class="font-noirTitle text-2xl font-bold text-white">9 Módulos</div>
+                    <p class="text-xs text-noir-cream/60 mt-1">Do básico ao mestre backend</p>
+                </div>
+                <div class="glass-panel p-4 rounded-xl border border-noir-gold/20">
+                    <div class="font-typewriter text-xs text-noir-gold">Formato das Aulas</div>
+                    <div class="font-noirTitle text-2xl font-bold text-white">Presencial / Híbrido</div>
+                    <p class="text-xs text-noir-cream/60 mt-1">Supervisão de mentores</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: DOSSIÊS / CURSOS GRID -->
+        <section id="dossies" class="scroll-mt-24">
+            <div class="text-center mb-12">
+                <span class="stamp-approved mb-3">ARQUIVOS CONFIDENCIAIS</span>
+                <h2 class="font-noirTitle text-3xl sm:text-5xl font-bold text-noir-cream mb-4">
+                    Catálogo de Dossiês & Treinamentos
+                </h2>
+                <p class="font-typewriter text-noir-cream/70 max-w-xl mx-auto text-sm sm:text-base">
+                    Filtre os relatórios conforme a sua especialidade desejada no sindicato.
+                </p>
+
+                <!-- Filter Category Tabs -->
+                <div class="flex flex-wrap justify-center gap-2 mt-8 font-typewriter text-xs sm:text-sm">
+                    <button onclick="filterCourses('all')" id="btn-filter-all" class="filter-btn active px-5 py-2.5 rounded-lg glass-panel text-noir-gold border border-noir-gold font-bold transition-all">
+                        Todos os Dossiês
+                    </button>
+                    <button onclick="filterCourses('python')" id="btn-filter-python" class="filter-btn px-5 py-2.5 rounded-lg glass-panel text-noir-cream/70 border border-noir-gold/20 hover:border-noir-gold hover:text-noir-gold transition-all">
+                        <i class="fa-brands fa-python mr-1"></i> Python Investigation
+                    </button>
+                    <button onclick="filterCourses('web')" id="btn-filter-web" class="filter-btn px-5 py-2.5 rounded-lg glass-panel text-noir-cream/70 border border-noir-gold/20 hover:border-noir-gold hover:text-noir-gold transition-all">
+                        <i class="fa-solid fa-code mr-1"></i> Sindicato Web
+                    </button>
+                    <button onclick="filterCourses('database')" id="btn-filter-database" class="filter-btn px-5 py-2.5 rounded-lg glass-panel text-noir-cream/70 border border-noir-gold/20 hover:border-noir-gold hover:text-noir-gold transition-all">
+                        <i class="fa-solid fa-database mr-1"></i> Arquivos Confidenciais (BD)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Course Grid Container -->
+            <div id="course-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Javascript will inject cards dynamically based on courseData -->
+            </div>
+        </section>
+
+        <!-- SECTION 3: CALCULADORA DE CARGA HORÁRIA -->
+        <section id="calculadora" class="glass-panel rounded-3xl p-6 sm:p-10 border border-noir-gold/30 shadow-glass scroll-mt-24">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex flex-col md:flex-row items-center gap-8 mb-8">
+                    <div class="w-20 h-20 rounded-2xl bg-noir-onyx border-2 border-noir-gold flex items-center justify-center text-noir-gold shrink-0 shadow-gold-glow">
+                        <i class="fa-solid fa-calculator text-3xl"></i>
+                    </div>
+                    <div>
+                        <span class="font-typewriter text-xs text-noir-gold uppercase tracking-widest">Planejamento de Carreira Noir</span>
+                        <h2 class="font-noirTitle text-3xl font-bold text-white mt-1">Calculadora de Horas de Voo do Cadete</h2>
+                        <p class="font-typewriter text-noir-cream/70 text-sm mt-1">
+                            Monte seu itinerário de estudos. Selecione os casos em que deseja trabalhar e descubra o tempo necessário para conquistar sua licença de Detetive Master.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                    <!-- Checkbox List of Courses -->
+                    <div class="lg:col-span-2 space-y-3" id="calculator-checkboxes">
+                        <!-- Injected by JS -->
+                    </div>
+
+                    <!-- Calculator Summary Display -->
+                    <div class="glass-panel p-6 rounded-2xl border border-noir-gold/40 bg-noir-onyx/90 space-y-6">
+                        <h3 class="font-typewriter text-noir-gold font-bold text-lg border-b border-noir-gold/20 pb-3 flex items-center justify-between">
+                            <span>Resumo da Jornada</span>
+                            <i class="fa-solid fa-stamp"></i>
+                        </h3>
+
+                        <div class="space-y-4">
+                            <div>
+                                <div class="text-xs font-typewriter text-noir-cream/60">Carga Horária Total:</div>
+                                <div id="calc-total-hours" class="font-noirTitle text-4xl font-black text-noir-gold">0h</div>
+                            </div>
+
+                            <div>
+                                <div class="text-xs font-typewriter text-noir-cream/60">Estimativa de Semanas (6h/semana):</div>
+                                <div id="calc-total-weeks" class="font-noirTitle text-2xl font-bold text-white">0 semanas</div>
+                            </div>
+
+                            <div>
+                                <div class="text-xs font-typewriter text-noir-cream/60">Selo Conquistado:</div>
+                                <div id="calc-badge" class="font-typewriter text-sm text-noir-brass font-bold italic mt-1">Nenhum Módulo Selecionado</div>
+                            </div>
+                        </div>
+
+                        <button onclick="applyCalculatorToDrawer()" class="w-full py-3 rounded-xl bg-noir-gold hover:bg-noir-brass text-noir-black font-typewriter font-bold text-sm transition-all shadow-gold-glow">
+                            Transferir Seleção para o Caso
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: INTERROGATÓRIO / INSCRIÇÃO -->
+        <section id="interrogatorio" class="scroll-mt-24">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                
+                <!-- Left Column Narrative -->
+                <div class="lg:col-span-5 space-y-6">
+                    <span class="stamp-approved">SALA DE INTERROGATÓRIO</span>
+                    <h2 class="font-noirTitle text-3xl sm:text-5xl font-bold text-white leading-tight">
+                        Pronto para Assinar o Contrato, Cadete?
+                    </h2>
+                    <p class="font-typewriter text-noir-cream/80 text-sm sm:text-base leading-relaxed">
+                        Nossos mentores seniores estão aguardando no escritório da agência. Preencha a ficha cadastral abaixo. Se for menor de idade, certifique-se de trazer o Responsável Legal para assinar a autorização.
+                    </p>
+
+                    <div class="glass-panel p-6 rounded-2xl border border-noir-gold/20 space-y-4">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-lg bg-noir-gold/10 border border-noir-gold/30 flex items-center justify-center text-noir-gold shrink-0">
+                                <i class="fa-solid fa-building"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-typewriter text-sm font-bold text-white">Sede Central da Agência</h4>
+                                <p class="text-xs text-noir-cream/70">Av. Paulista, Sala 1930 - São Paulo, SP</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-lg bg-noir-gold/10 border border-noir-gold/30 flex items-center justify-center text-noir-gold shrink-0">
+                                <i class="fa-solid fa-phone"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-typewriter text-sm font-bold text-white">Linha Direta Telegrafada</h4>
+                                <p class="text-xs text-noir-cream/70">(11) 91930-NOIR / contato@sindicatonoir.tech</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column Form with Typewriter Effect -->
+                <div class="lg:col-span-7">
+                    <form id="enrollment-form" onsubmit="handleFormSubmit(event)" class="glass-panel p-8 rounded-3xl border border-noir-gold/30 shadow-glass space-y-6 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-noir-gold text-noir-black px-4 py-1 font-typewriter text-xs font-bold uppercase rounded-bl-xl">
+                            Ficha de Depoimento #1930
+                        </div>
+
+                        <h3 class="font-noirTitle text-2xl font-bold text-noir-cream border-b border-noir-gold/20 pb-4">
+                            Formulário do Cadete / Responsável
+                        </h3>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <!-- Nome Completo -->
+                            <div class="space-y-2">
+                                <label class="font-typewriter text-xs text-noir-gold block uppercase tracking-wider">
+                                    Nome do Cadete ou Aluno *
+                                </label>
+                                <input type="text" required oninput="playTypewriterSound()" placeholder="Ex: Philip Marlowe" class="w-full bg-noir-onyx/80 border border-noir-gold/30 rounded-xl px-4 py-3 text-sm text-noir-cream focus:outline-none focus:border-noir-gold transition-colors font-typewriter">
+                            </div>
+
+                            <!-- Perfil (Jovem ou Pai/Mãe) -->
+                            <div class="space-y-2">
+                                <label class="font-typewriter text-xs text-noir-gold block uppercase tracking-wider">
+                                    Quem está Preenchendo? *
+                                </label>
+                                <select required onchange="playTypewriterSound()" class="w-full bg-noir-onyx/80 border border-noir-gold/30 rounded-xl px-4 py-3 text-sm text-noir-cream focus:outline-none focus:border-noir-gold transition-colors font-typewriter">
+                                    <option value="">Selecione seu perfil...</option>
+                                    <option value="estudante">Futuro Cadete (Estudante/Jovem)</option>
+                                    <option value="responsavel">Pai/Mãe/Responsável Legal</option>
+                                    <option value="profissional">Profissional em Transição</option>
+                                </select>
+                            </div>
+
+                            <!-- E-mail de Contato -->
+                            <div class="space-y-2">
+                                <label class="font-typewriter text-xs text-noir-gold block uppercase tracking-wider">
+                                    E-mail da Linha Direta *
+                                </label>
+                                <input type="email" required oninput="playTypewriterSound()" placeholder="investigador@email.com" class="w-full bg-noir-onyx/80 border border-noir-gold/30 rounded-xl px-4 py-3 text-sm text-noir-cream focus:outline-none focus:border-noir-gold transition-colors font-typewriter">
+                            </div>
+
+                            <!-- Telefone/WhatsApp -->
+                            <div class="space-y-2">
+                                <label class="font-typewriter text-xs text-noir-gold block uppercase tracking-wider">
+                                    Telegrafo / WhatsApp *
+                                </label>
+                                <input type="tel" required oninput="playTypewriterSound()" placeholder="(11) 99999-9999" class="w-full bg-noir-onyx/80 border border-noir-gold/30 rounded-xl px-4 py-3 text-sm text-noir-cream focus:outline-none focus:border-noir-gold transition-colors font-typewriter">
+                            </div>
+                        </div>
+
+                        <!-- Turno Desejado -->
+                        <div class="space-y-2">
+                            <label class="font-typewriter text-xs text-noir-gold block uppercase tracking-wider">
+                                Turno Preferencial das Aulas
+                            </label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <label class="flex items-center gap-2 p-3 rounded-xl border border-noir-gold/20 bg-noir-onyx cursor-pointer hover:border-noir-gold text-xs font-typewriter">
+                                    <input type="radio" name="turno" value="matutino" checked class="accent-noir-gold">
+                                    Matutino
+                                </label>
+                                <label class="flex items-center gap-2 p-3 rounded-xl border border-noir-gold/20 bg-noir-onyx cursor-pointer hover:border-noir-gold text-xs font-typewriter">
+                                    <input type="radio" name="turno" value="vespertino" class="accent-noir-gold">
+                                    Vespertino
+                                </label>
+                                <label class="flex items-center gap-2 p-3 rounded-xl border border-noir-gold/20 bg-noir-onyx cursor-pointer hover:border-noir-gold text-xs font-typewriter">
+                                    <input type="radio" name="turno" value="noturno" class="accent-noir-gold">
+                                    Noturno
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Observações/Mensagem -->
+                        <div class="space-y-2">
+                            <label class="font-typewriter text-xs text-noir-gold block uppercase tracking-wider">
+                                Depoimento Adicional / Dúvidas Especiais
+                            </label>
+                            <textarea rows="3" oninput="playTypewriterSound()" placeholder="Escreva aqui detalhes adicionais ou perguntas para a agência..." class="w-full bg-noir-onyx/80 border border-noir-gold/30 rounded-xl px-4 py-3 text-sm text-noir-cream focus:outline-none focus:border-noir-gold transition-colors font-typewriter"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-noir-gold to-noir-brass text-noir-black font-typewriter font-bold text-base shadow-gold-glow hover:shadow-gold-glow-lg transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            Enviar Ficha para o Detetive Chefe
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: FAQ DOS CADETES -->
+        <section id="faq" class="scroll-mt-24">
+            <div class="text-center mb-12">
+                <span class="stamp-approved">INTERROGATÓRIO FREQUENTE</span>
+                <h2 class="font-noirTitle text-3xl sm:text-5xl font-bold text-noir-cream mt-2">
+                    Dúvidas Frequentes dos Cadetes & Pais
+                </h2>
+                <p class="font-typewriter text-noir-cream/70 max-w-xl mx-auto text-sm mt-2">
+                    Respostas diretas do inspetor para as perguntas mais comuns do sindicato.
+                </p>
+            </div>
+
+            <div class="max-w-3xl mx-auto space-y-4" id="faq-accordion">
+                <!-- FAQ Item 1 -->
+                <div class="glass-panel rounded-2xl border border-noir-gold/20 overflow-hidden">
+                    <button onclick="toggleFaq(1)" class="w-full px-6 py-4 text-left font-noirTitle font-bold text-lg text-noir-cream hover:text-noir-gold flex justify-between items-center transition-colors">
+                        <span>Preciso de conhecimento prévio em informática para começar?</span>
+                        <i id="faq-icon-1" class="fa-solid fa-chevron-down text-noir-gold transition-transform"></i>
+                    </button>
+                    <div id="faq-content-1" class="hidden px-6 pb-4 font-typewriter text-sm text-noir-cream/80 border-t border-noir-gold/10 pt-3">
+                        Não, aspirante! Nosso curso "Programação em Python 1" e "Desenvolvimento Web com HTML, CSS e JS" foram elaborados especificamente para quem está dando os primeiros passos no mundo do código. Ensinamos a lógica do zero com metáforas do universo noir.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="glass-panel rounded-2xl border border-noir-gold/20 overflow-hidden">
+                    <button onclick="toggleFaq(2)" class="w-full px-6 py-4 text-left font-noirTitle font-bold text-lg text-noir-cream hover:text-noir-gold flex justify-between items-center transition-colors">
+                        <span>Os cursos emitem certificado reconhecido para os Cadetes?</span>
+                        <i id="faq-icon-2" class="fa-solid fa-chevron-down text-noir-gold transition-transform"></i>
+                    </button>
+                    <div id="faq-content-2" class="hidden px-6 pb-4 font-typewriter text-sm text-noir-cream/80 border-t border-noir-gold/10 pt-3">
+                        Com certeza. Ao completar a carga horária e entregar o projeto prático final de cada dossiê, o aluno recebe a sua Licença de Investigador Tech com a selagem oficial do Sindicato Noir.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="glass-panel rounded-2xl border border-noir-gold/20 overflow-hidden">
+                    <button onclick="toggleFaq(3)" class="w-full px-6 py-4 text-left font-noirTitle font-bold text-lg text-noir-cream hover:text-noir-gold flex justify-between items-center transition-colors">
+                        <span>Como os pais podem acompanhar o progresso dos jovens?</span>
+                        <i id="faq-icon-3" class="fa-solid fa-chevron-down text-noir-gold transition-transform"></i>
+                    </button>
+                    <div id="faq-content-3" class="hidden px-6 pb-4 font-typewriter text-sm text-noir-cream/80 border-t border-noir-gold/10 pt-3">
+                        Fornecemos um boletim telegrafado mensal e canal direto via WhatsApp com os mentores do curso. Além disso, os pais podem assistir aos dias de apresentação final do "Caso de Estudo".
+                    </div>
+                </div>
+
+                <!-- FAQ Item 4 -->
+                <div class="glass-panel rounded-2xl border border-noir-gold/20 overflow-hidden">
+                    <button onclick="toggleFaq(4)" class="w-full px-6 py-4 text-left font-noirTitle font-bold text-lg text-noir-cream hover:text-noir-gold flex justify-between items-center transition-colors">
+                        <span>Quais os equipamentos necessários para as aulas?</span>
+                        <i id="faq-icon-4" class="fa-solid fa-chevron-down text-noir-gold transition-transform"></i>
+                    </button>
+                    <div id="faq-content-4" class="hidden px-6 pb-4 font-typewriter text-sm text-noir-cream/80 border-t border-noir-gold/10 pt-3">
+                        Apenas um notebook ou computador simples com acesso à internet. Todas as ferramentas e ambientes de programação (Python, SQLite, VS Code) são gratuitos e instalados no primeiro dia de aula com o auxílio do instrutor.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER SEMÂNTICO -->
+    <footer class="glass-panel border-t border-noir-gold/20 mt-20 py-12 relative z-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="space-y-4">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-user-secret text-2xl text-noir-gold"></i>
+                    <span class="font-noirTitle text-xl font-bold text-white tracking-wider">SINDICATO NOIR</span>
+                </div>
+                <p class="font-typewriter text-xs text-noir-cream/70 leading-relaxed">
+                    Formando os mais astutos detetives de software da cidade desde o século passado. Código limpo, lógica afiada.
+                </p>
+            </div>
+
+            <div>
+                <h4 class="font-typewriter text-xs text-noir-gold font-bold uppercase tracking-widest mb-4">Investigações</h4>
+                <ul class="font-typewriter text-xs space-y-2 text-noir-cream/70">
+                    <li><a href="#dossies" class="hover:text-noir-gold transition-colors">Formação Python</a></li>
+                    <li><a href="#dossies" class="hover:text-noir-gold transition-colors">Desenvolvimento Web</a></li>
+                    <li><a href="#dossies" class="hover:text-noir-gold transition-colors">Bancos de Dados Confidenciais</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-typewriter text-xs text-noir-gold font-bold uppercase tracking-widest mb-4">Central de Apoio</h4>
+                <ul class="font-typewriter text-xs space-y-2 text-noir-cream/70">
+                    <li><a href="#calculadora" class="hover:text-noir-gold transition-colors">Calculadora de Horas</a></li>
+                    <li><a href="#interrogatorio" class="hover:text-noir-gold transition-colors">Matrícula do Cadete</a></li>
+                    <li><a href="#faq" class="hover:text-noir-gold transition-colors">Perguntas Frequentes</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-typewriter text-xs text-noir-gold font-bold uppercase tracking-widest mb-4">Boletim Secreto</h4>
+                <p class="font-typewriter text-xs text-noir-cream/70 mb-3">Receba pistas semanais sobre tecnologia no seu e-mail.</p>
+                <div class="flex gap-2">
+                    <input type="email" placeholder="Seu e-mail secreto" class="bg-noir-onyx border border-noir-gold/30 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-noir-gold w-full font-typewriter">
+                    <button class="bg-noir-gold hover:bg-noir-brass text-noir-black px-3 py-2 rounded-lg font-bold text-xs">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-noir-gold/10 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center font-typewriter text-xs text-noir-cream/50 gap-4">
+            <p>© 2026 Sindicato Noir Tech Academy. Todos os direitos reservados aos detetives.</p>
+            <div class="flex gap-4">
+                <a href="#" class="hover:text-noir-gold">Código de Conduta</a>
+                <a href="#" class="hover:text-noir-gold">Sigilo de Dados</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- DETAILED DOSSIER MODAL -->
+    <div id="course-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-noir-black/80 backdrop-blur-md">
+        <div class="glass-panel w-full max-w-2xl rounded-3xl border border-noir-gold/40 bg-noir-onyx/95 shadow-gold-glow-lg overflow-hidden transform transition-all max-h-[90vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-noir-gold/20 flex justify-between items-start bg-noir-carbon/50">
+                <div>
+                    <span id="modal-category" class="stamp-approved text-xs mb-2 inline-block">CATEGORIA</span>
+                    <h3 id="modal-title" class="font-noirTitle text-2xl font-bold text-white">Título do Causal</h3>
+                    <p id="modal-subtitle" class="font-typewriter text-xs text-noir-gold mt-1"></p>
+                </div>
+                <button onclick="closeCourseModal()" class="text-noir-cream/60 hover:text-noir-gold text-2xl transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content Body -->
+            <div class="p-6 overflow-y-auto space-y-6 font-typewriter text-sm text-noir-cream/80">
+                <div>
+                    <h4 class="text-xs text-noir-gold uppercase font-bold tracking-widest mb-2">Resumo da Investigação</h4>
+                    <p id="modal-description" class="leading-relaxed"></p>
+                </div>
+
+                <div>
+                    <h4 class="text-xs text-noir-gold uppercase font-bold tracking-widest mb-2">Ementa do Caso (O que você vai desvendar):</h4>
+                    <ul id="modal-syllabus" class="list-disc list-inside space-y-1.5 text-xs text-noir-cream/90">
+                        <!-- JS injected -->
+                    </ul>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 pt-2">
+                    <div class="glass-panel p-3 rounded-xl border border-noir-gold/10">
+                        <span class="text-xs text-noir-cream/60 block">Carga Horária:</span>
+                        <span id="modal-hours" class="font-noirTitle text-lg font-bold text-noir-gold"></span>
+                    </div>
+                    <div class="glass-panel p-3 rounded-xl border border-noir-gold/10">
+                        <span class="text-xs text-noir-cream/60 block">Nível de Dificuldade:</span>
+                        <span id="modal-level" class="font-noirTitle text-lg font-bold text-white"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer Actions -->
+            <div class="p-6 border-t border-noir-gold/20 bg-noir-carbon/50 flex flex-col sm:flex-row gap-3 justify-end">
+                <button onclick="closeCourseModal()" class="px-5 py-2.5 rounded-xl border border-noir-gold/30 hover:border-noir-gold text-noir-cream font-typewriter text-xs font-bold transition-all">
+                    Fechar Dossiê
+                </button>
+                <button id="modal-add-btn" onclick="" class="px-6 py-2.5 rounded-xl bg-noir-gold hover:bg-noir-brass text-noir-black font-typewriter text-xs font-bold shadow-gold-glow transition-all">
+                    Adicionar ao Meu Caso
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ENROLLMENT CASE BASKET DRAWER (SLIDE OVER) -->
+    <div id="case-drawer" class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-noir-onyx/95 glass-panel border-l border-noir-gold/40 shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+        <!-- Drawer Header -->
+        <div class="p-6 border-b border-noir-gold/20 flex justify-between items-center bg-noir-carbon">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-briefcase text-noir-gold text-xl"></i>
+                <h3 class="font-noirTitle text-xl font-bold text-white">Seu Dossiê de Estudo</h3>
+            </div>
+            <button onclick="toggleCaseDrawer()" class="text-noir-cream/60 hover:text-noir-gold text-xl transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Drawer Selected Courses List -->
+        <div id="drawer-course-list" class="flex-1 overflow-y-auto p-6 space-y-4">
+            <!-- JS dynamic content -->
+        </div>
+
+        <!-- Drawer Footer & Action -->
+        <div class="p-6 border-t border-noir-gold/20 bg-noir-carbon space-y-4">
+            <div class="flex justify-between items-center font-typewriter text-sm">
+                <span class="text-noir-cream/70">Total Carga Horária:</span>
+                <span id="drawer-total-hours" class="font-noirTitle text-2xl font-bold text-noir-gold">0h</span>
+            </div>
+
+            <a href="#interrogatorio" onclick="toggleCaseDrawer()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-noir-gold to-noir-brass text-noir-black font-typewriter font-bold text-sm text-center block shadow-gold-glow hover:shadow-gold-glow-lg transition-all">
+                Finalizar Matrícula no Caso
+            </a>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION BOX -->
+    <div id="toast-notification" class="fixed bottom-6 right-6 z-50 hidden glass-panel border border-noir-gold px-6 py-4 rounded-2xl shadow-gold-glow-lg font-typewriter text-xs text-noir-cream flex items-center gap-3">
+        <i class="fa-solid fa-circle-check text-noir-gold text-lg"></i>
+        <span id="toast-message">Mensagem do inspetor enviada!</span>
+    </div>
+
+    <script>
+        /* ==========================================================================
+           1. DATA STRUCTURE (9 COURSES IN 3 CATEGORIES)
+           ========================================================================== */
+        const coursesData = [
+            // Python Category
+            {
+                id: 'python-1',
+                category: 'python',
+                categoryName: 'Python Investigation',
+                title: 'Programação em Python 1',
+                subtitle: 'O Primeiro Dossiê: Fundamentos de Código',
+                hours: 40,
+                level: 'Iniciante / Cadete',
+                icon: 'fa-brands fa-python',
+                description: 'Inicie sua carreira investigando a sintaxe mais elegante e poderosa do mercado. Aprenda variáveis, condicionais, laços de repetição e lógica fundamental para desvendar mistérios operacionais.',
+                syllabus: [
+                    'Sintaxe e Tipos de Dados Básicos',
+                    'Estruturas de Decisão (if, else, elif)',
+                    'Laços de Repetição (while, for)',
+                    'Funções e Parâmetros da Investigação',
+                    'Manipulação de Listas e Dicionários'
+                ]
+            },
+            {
+                id: 'python-2',
+                category: 'python',
+                categoryName: 'Python Investigation',
+                title: 'Programação em Python 2',
+                subtitle: 'Pistas Avançadas: Estrutura & POO',
+                hours: 40,
+                level: 'Intermediário',
+                icon: 'fa-brands fa-python',
+                description: 'Aprofunde-se nos mistérios da Programação Orientada a Objetos (POO). Crie classes, estruture objetos e domine a manipulação avançada de dados para organizar dossiês complexos.',
+                syllabus: [
+                    'Classes, Objetos e Métodos Especializados',
+                    'Herança, Polimorfismo e Encapsulamento',
+                    'Tratamento de Exceções e Erros',
+                    'Manipulação de Arquivos e Leitura de Logs',
+                    'Módulos Nativos e Pacotes Externos'
+                ]
+            },
+            {
+                id: 'python-3',
+                category: 'python',
+                categoryName: 'Python Investigation',
+                title: 'Programação em Python 3',
+                subtitle: 'O Mestre dos Arquivos: Projetos Complexos',
+                hours: 60,
+                level: 'Avançado / Detetive Master',
+                icon: 'fa-brands fa-python',
+                description: 'Construa automações complexas, scripts de busca de pistas na web (Web Scraping) e estruturas de software resilientes prontas para produção de grande porte.',
+                syllabus: [
+                    'Web Scraping com BeautifulSoup e Selenium',
+                    'Automação de Tarefas Repetitivas',
+                    'Consumo de APIs RESTful',
+                    'Testes Unitários e Qualidade de Software',
+                    'Projeto Final: O Dossiê Automatizado'
+                ]
+            },
+
+            // Web Category
+            {
+                id: 'web-1',
+                category: 'web',
+                categoryName: 'Sindicato Web',
+                title: 'Desenvolvimento Web com HTML, CSS e JS',
+                subtitle: 'A Fachada do Sindicato Web',
+                hours: 60,
+                level: 'Iniciante / Cadete',
+                icon: 'fa-solid fa-code',
+                description: 'Construa a estrutura visual e interativa dos portais da web. Domine a semântica do HTML5, o estilo estilizado com CSS3 moderno e os scripts dinâmicos de JavaScript.',
+                syllabus: [
+                    'HTML5 Semântico e Estruturação de Páginas',
+                    'CSS3 Grid, Flexbox e Design Responsivo',
+                    'JavaScript DOM e Manipulação de Eventos',
+                    'Animações CSS e Efeitos Interativos',
+                    'Hospedagem da Fachada no GitHub e Netlify'
+                ]
+            },
+            {
+                id: 'web-2',
+                category: 'web',
+                categoryName: 'Sindicato Web',
+                title: 'Desenvolvimento Web com React',
+                subtitle: 'Interfaces Interativas de Alto Impacto',
+                hours: 40,
+                level: 'Intermediário',
+                icon: 'fa-brands fa-react',
+                description: 'Crie Single Page Applications (SPAs) modernas e reativas. Domine componentes, estados, hooks e integrações com APIs para construir portais dinâmicos em tempo recorde.',
+                syllabus: [
+                    'Componentes Funcionais e JSX',
+                    'Gerenciamento de Estado (useState, useEffect)',
+                    'Roteamento e Navegação Reativa',
+                    'Consumo de Serviços e APIs Externas',
+                    'Boas Práticas e Arquitetura de Componentes'
+                ]
+            },
+            {
+                id: 'web-3',
+                category: 'web',
+                categoryName: 'Sindicato Web',
+                title: 'Desenvolvimento Web com Flask e Django',
+                subtitle: 'Bastidores & Operações Backend',
+                hours: 80,
+                level: 'Avançado / Detetive Master',
+                icon: 'fa-solid fa-server',
+                description: 'Infiltre-se no backend. Aprenda a construir servidores robustos, sistemas de autenticação seguros e APIs potentes utilizando os dois maiores frameworks Python do mercado.',
+                syllabus: [
+                    'Arquitetura MVC e MVT no Backend',
+                    'Criação de APIs REST com Flask',
+                    'Desenvolvimento Completo com Django Framework',
+                    'Autenticação, Sessões e Permissões de Usuário',
+                    'Deploy e Publicação do Servidor em Nuvem'
+                ]
+            },
+
+            // Database Category
+            {
+                id: 'database-1',
+                category: 'database',
+                categoryName: 'Arquivos Confidenciais',
+                title: 'Banco de Dados SQLite3',
+                subtitle: 'Caderno de Anotações do Detetive',
+                hours: 20,
+                level: 'Iniciante',
+                icon: 'fa-solid fa-database',
+                description: 'Aprenda a criar e consultar bancos de dados relacionais embutidos e leves. Perfeito para armazenar evidências de pequenas e médias aplicações de forma rápida.',
+                syllabus: [
+                    'Modelagem de Dados Relacional Básica',
+                    'Comandos SQL: SELECT, INSERT, UPDATE, DELETE',
+                    'Filtros, Cláusulas WHERE e Ordenação',
+                    'Integração Nativa com Python e Aplicações Desktop'
+                ]
+            },
+            {
+                id: 'database-2',
+                category: 'database',
+                categoryName: 'Arquivos Confidenciais',
+                title: 'Banco de Dados Realtime Database',
+                subtitle: 'Escuta Telegrafada em Tempo Real',
+                hours: 20,
+                level: 'Intermediário',
+                icon: 'fa-solid fa-bolt',
+                description: 'Acompanhe dados na velocidade do telégrafo. Domine bancos NoSQL em tempo real para sincronização instantânea de informações entre múltiplos clientes.',
+                syllabus: [
+                    'Estrutura de Dados NoSQL e Árvores JSON',
+                    'Sincronização Reativa em Tempo Real',
+                    'Regras de Segurança e Permissões de Acesso',
+                    'Integração com Web Apps e Dispositivos Móveis'
+                ]
+            },
+            {
+                id: 'database-3',
+                category: 'database',
+                categoryName: 'Arquivos Confidenciais',
+                title: 'Banco de Dados PostgreSQL',
+                subtitle: 'O Cofre Central de Informações',
+                hours: 40,
+                level: 'Avançado',
+                icon: 'fa-solid fa-vault',
+                description: 'O cofre mais seguro da indústria. Aprenda a gerenciar grandes volumes de dados, consultas complexas com JOINs, indexação e integridade transacional ACID.',
+                syllabus: [
+                    'Modelagem Avançada e Chaves Estrangeiras',
+                    'Consultas Complexas (JOINs, Aggregations, Subqueries)',
+                    'Transações ACID e Consistência',
+                    'Indexação, Otimização de Performance e Triggers'
+                ]
+            }
+        ];
+
+        /* ==========================================================================
+           2. STATE MANAGEMENT
+           ========================================================================== */
+        let activeFilter = 'all';
+        let selectedCourseIds = [];
+        let audioEnabled = true;
+
+        /* ==========================================================================
+           3. AUDIO SYSTEM (Web Audio API - Typewriter Sound)
+           ========================================================================== */
+        let audioCtx = null;
+
+        function playTypewriterSound() {
+            if (!audioEnabled) return;
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                // Create short noise burst for typewriter click
+                const bufferSize = audioCtx.sampleRate * 0.015; // 15ms click
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const output = buffer.getChannelData(0);
+                
+                for (let i = 0; i < bufferSize; i++) {
+                    output[i] = Math.random() * 2 - 1;
+                }
+
+                const whiteNoise = audioCtx.createBufferSource();
+                whiteNoise.buffer = buffer;
+
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.value = 1200 + Math.random() * 800;
+
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.015);
+
+                whiteNoise.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                whiteNoise.start();
+            } catch (e) {
+                // Audio fallback silence
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (audioEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-lg';
+                showToast('Efeitos de máquina de escrever ativados.');
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-lg';
+                showToast('Efeitos sonoros desativados.');
+            }
+        }
+
+        /* ==========================================================================
+           4. RENDER COURSES & FILTERS
+           ========================================================================== */
+        function renderCourseCards() {
+            const grid = document.getElementById('course-grid');
+            grid.innerHTML = '';
+
+            const filtered = activeFilter === 'all' 
+                ? coursesData 
+                : coursesData.filter(c => c.category === activeFilter);
+
+            filtered.forEach(course => {
+                const isSelected = selectedCourseIds.includes(course.id);
+                const card = document.createElement('article');
+                card.className = 'glass-panel-interactive rounded-3xl p-6 flex flex-col justify-between relative overflow-hidden group';
+
+                card.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="stamp-approved text-xs">${course.categoryName}</span>
+                            <span class="font-typewriter text-xs text-noir-gold bg-noir-onyx/80 border border-noir-gold/30 px-3 py-1 rounded-full">
+                                <i class="fa-regular fa-clock mr-1"></i>${course.hours}h
+                            </span>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <div class="w-12 h-12 rounded-xl bg-noir-onyx border border-noir-gold/40 flex items-center justify-center text-noir-gold text-2xl shrink-0 group-hover:border-noir-gold transition-colors">
+                                <i class="${course.icon}"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-noirTitle text-xl font-bold text-white group-hover:text-noir-gold transition-colors leading-tight">
+                                    ${course.title}
+                                </h3>
+                                <p class="font-typewriter text-xs text-noir-gold/80 italic mt-1">${course.subtitle}</p>
+                            </div>
+                        </div>
+
+                        <p class="font-typewriter text-xs text-noir-cream/75 leading-relaxed line-clamp-3">
+                            ${course.description}
+                        </p>
+                    </div>
+
+                    <div class="pt-6 mt-6 border-t border-noir-gold/10 flex items-center justify-between gap-2">
+                        <button onclick="openCourseModal('${course.id}')" class="text-xs font-typewriter text-noir-cream/80 hover:text-noir-gold underline transition-colors flex items-center gap-1">
+                            <i class="fa-solid fa-eye"></i> Abrir Dossiê
+                        </button>
+
+                        <button onclick="toggleSelectCourse('${course.id}')" class="px-4 py-2 rounded-xl font-typewriter text-xs font-bold transition-all ${
+                            isSelected 
+                                ? 'bg-noir-charcoal text-noir-gold border border-noir-gold' 
+                                : 'bg-noir-gold text-noir-black hover:bg-noir-brass shadow-gold-glow'
+                        }">
+                            ${isSelected ? '<i class="fa-solid fa-check mr-1"></i> Selecionado' : '<i class="fa-solid fa-plus mr-1"></i> Investigar'}
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterCourses(category) {
+            activeFilter = category;
+            playTypewriterSound();
+
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active', 'text-noir-gold', 'border-noir-gold');
+                btn.classList.add('text-noir-cream/70', 'border-noir-gold/20');
+            });
+
+            const activeBtn = document.getElementById(`btn-filter-${category}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active', 'text-noir-gold', 'border-noir-gold');
+                activeBtn.classList.remove('text-noir-cream/70', 'border-noir-gold/20');
+            }
+
+            renderCourseCards();
+        }
+
+        /* ==========================================================================
+           5. CALCULATOR LOGIC
+           ========================================================================== */
+        function renderCalculatorList() {
+            const container = document.getElementById('calculator-checkboxes');
+            container.innerHTML = '';
+
+            coursesData.forEach(course => {
+                const isChecked = selectedCourseIds.includes(course.id);
+                const item = document.createElement('label');
+                item.className = `flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer ${
+                    isChecked 
+                        ? 'glass-panel border-noir-gold bg-noir-onyx/90' 
+                        : 'glass-panel border-noir-gold/20 hover:border-noir-gold/40'
+                }`;
+
+                item.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSelectCourse('${course.id}')" class="w-4 h-4 accent-noir-gold rounded cursor-pointer">
+                        <div>
+                            <div class="font-noirTitle text-sm font-bold text-white">${course.title}</div>
+                            <div class="font-typewriter text-xs text-noir-cream/60">${course.categoryName}</div>
+                        </div>
+                    </div>
+                    <span class="font-typewriter text-xs font-bold text-noir-gold bg-noir-black px-3 py-1 rounded-full border border-noir-gold/30">
+                        ${course.hours}h
+                    </span>
+                `;
+                container.appendChild(item);
+            });
+
+            updateCalculatorSummary();
+        }
+
+        function updateCalculatorSummary() {
+            const selectedCourses = coursesData.filter(c => selectedCourseIds.includes(c.id));
+            const totalHours = selectedCourses.reduce((acc, c) => acc + c.hours, 0);
+            
+            // Assume 6 hours/week of studies
+            const totalWeeks = Math.ceil(totalHours / 6);
+
+            document.getElementById('calc-total-hours').innerText = `${totalHours}h`;
+            document.getElementById('calc-total-weeks').innerText = `${totalWeeks} semanas`;
+
+            const badgeElem = document.getElementById('calc-badge');
+            if (totalHours === 0) {
+                badgeElem.innerText = 'Nenhum Módulo Selecionado';
+            } else if (totalHours < 100) {
+                badgeElem.innerText = '★ Cadete Investigador Jr.';
+            } else if (totalHours < 250) {
+                badgeElem.innerText = '★★ Detetive Pleno de Código';
+            } else {
+                badgeElem.innerText = '★★★ Mestre Inspetor Geral Noir';
+            }
+
+            document.getElementById('cart-count-badge').innerText = selectedCourseIds.length;
+            renderCaseDrawerContent();
+        }
+
+        function applyCalculatorToDrawer() {
+            playTypewriterSound();
+            toggleCaseDrawer();
+            showToast('Seleção transferida para o seu dossiê!');
+        }
+
+        /* ==========================================================================
+           6. CASE DRAWER & SELECTION TOGGLES
+           ========================================================================== */
+        function toggleSelectCourse(courseId) {
+            playTypewriterSound();
+            if (selectedCourseIds.includes(courseId)) {
+                selectedCourseIds = selectedCourseIds.filter(id => id !== courseId);
+            } else {
+                selectedCourseIds.push(courseId);
+            }
+
+            renderCourseCards();
+            renderCalculatorList();
+        }
+
+        function toggleCaseDrawer() {
+            const drawer = document.getElementById('case-drawer');
+            drawer.classList.toggle('translate-x-full');
+        }
+
+        function renderCaseDrawerContent() {
+            const listContainer = document.getElementById('drawer-course-list');
+            listContainer.innerHTML = '';
+
+            const selectedCourses = coursesData.filter(c => selectedCourseIds.includes(c.id));
+            const totalHours = selectedCourses.reduce((acc, c) => acc + c.hours, 0);
+
+            document.getElementById('drawer-total-hours').innerText = `${totalHours}h`;
+
+            if (selectedCourses.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="text-center py-12 space-y-3">
+                        <i class="fa-solid fa-folder-open text-4xl text-noir-gold/40"></i>
+                        <p class="font-typewriter text-xs text-noir-cream/60">Seu dossiê está vazio.<br>Escolha alguns casos para investigar.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            selectedCourses.forEach(course => {
+                const item = document.createElement('div');
+                item.className = 'glass-panel p-4 rounded-xl border border-noir-gold/20 flex justify-between items-center';
+
+                item.innerHTML = `
+                    <div>
+                        <h4 class="font-noirTitle text-sm font-bold text-white">${course.title}</h4>
+                        <span class="font-typewriter text-xs text-noir-gold">${course.hours} horas</span>
+                    </div>
+                    <button onclick="toggleSelectCourse('${course.id}')" class="text-noir-cream/50 hover:text-red-400 text-sm transition-colors p-2">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+
+        /* ==========================================================================
+           7. MODAL DETAILED DOSSIER
+           ========================================================================== */
+        function openCourseModal(courseId) {
+            playTypewriterSound();
+            const course = coursesData.find(c => c.id === courseId);
+            if (!course) return;
+
+            document.getElementById('modal-category').innerText = course.categoryName;
+            document.getElementById('modal-title').innerText = course.title;
+            document.getElementById('modal-subtitle').innerText = course.subtitle;
+            document.getElementById('modal-description').innerText = course.description;
+            document.getElementById('modal-hours').innerText = `${course.hours} Horas Aula`;
+            document.getElementById('modal-level').innerText = course.level;
+
+            const syllabusList = document.getElementById('modal-syllabus');
+            syllabusList.innerHTML = '';
+            course.syllabus.forEach(item => {
+                const li = document.createElement('li');
+                li.innerText = item;
+                syllabusList.appendChild(li);
+            });
+
+            const addBtn = document.getElementById('modal-add-btn');
+            const isSelected = selectedCourseIds.includes(course.id);
+            addBtn.innerText = isSelected ? 'Remover do Caso' : 'Adicionar ao Meu Caso';
+            addBtn.onclick = () => {
+                toggleSelectCourse(course.id);
+                closeCourseModal();
+            };
+
+            document.getElementById('course-modal').classList.remove('hidden');
+        }
+
+        function closeCourseModal() {
+            document.getElementById('course-modal').classList.add('hidden');
+        }
+
+        /* ==========================================================================
+           8. FAQ ACCORDION & MENU TOGGLES
+           ========================================================================== */
+        function toggleFaq(index) {
+            playTypewriterSound();
+            const content = document.getElementById(`faq-content-${index}`);
+            const icon = document.getElementById(`faq-icon-${index}`);
+
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            playTypewriterSound();
+            showToast('Ficha enviada! O inspetor entrará em contato telegraficamente.');
+            e.target.reset();
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast-notification');
+            document.getElementById('toast-message').innerText = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 4000);
+        }
+
+        /* ==========================================================================
+           9. THREE.JS ATMOSPHERIC CANVASES (FOG, CODE PARTICLES & SPOTLIGHT)
+           ========================================================================== */
+        let scene, camera, renderer, particles, spotlightMesh;
+        let mouseX = 0, mouseY = 0;
+
+        function initThreeScene() {
+            const canvas = document.getElementById('three-canvas');
+            
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x040303, 0.002);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 400;
+
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            // Floating 3D Particles representing crime scene evidence / code snippet bits
+            const particleCount = 200;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+
+            const goldColor = new THREE.Color(0xd4af37);
+            const charcoalColor = new THREE.Color(0x2d3c37);
+
+            for (let i = 0; i < particleCount * 3; i += 3) {
+                positions[i] = (Math.random() - 0.5) * 1200;
+                positions[i + 1] = (Math.random() - 0.5) * 1200;
+                positions[i + 2] = (Math.random() - 0.5) * 800;
+
+                const mixedColor = Math.random() > 0.5 ? goldColor : charcoalColor;
+                colors[i] = mixedColor.r;
+                colors[i + 1] = mixedColor.g;
+                colors[i + 2] = mixedColor.b;
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            const material = new THREE.PointsMaterial({
+                size: 4,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.6
+            });
+
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            // Ambient & Spotlight Beam
+            const ambientLight = new THREE.AmbientLight(0x19201e, 1.5);
+            scene.add(ambientLight);
+
+            const spotLight = new THREE.SpotLight(0xd4af37, 2);
+            spotLight.position.set(0, 500, 200);
+            spotLight.angle = Math.PI / 4;
+            spotLight.penumbra = 0.8;
+            scene.add(spotLight);
+
+            window.addEventListener('resize', onWindowResize);
+            document.addEventListener('mousemove', onDocumentMouseMove);
+        }
+
+        function onDocumentMouseMove(event) {
+            mouseX = (event.clientX - window.innerWidth / 2) * 0.2;
+            mouseY = (event.clientY - window.innerHeight / 2) * 0.2;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animateThreeScene() {
+            requestAnimationFrame(animateThreeScene);
+
+            // Subtle rotation and particle float
+            if (particles) {
+                particles.rotation.y += 0.0005;
+                particles.rotation.x += 0.0002;
+            }
+
+            // Camera moves slightly towards mouse position for Noir parallax effect
+            camera.position.x += (mouseX - camera.position.x) * 0.03;
+            camera.position.y += (-mouseY - camera.position.y) * 0.03;
+            camera.lookAt(scene.position);
+
+            renderer.render(scene, camera);
+        }
+
+        /* ==========================================================================
+           10. INITIALIZATION ON WINDOW LOAD
+           ========================================================================== */
+        window.onload = function() {
+            initThreeScene();
+            animateThreeScene();
+
+            renderCourseCards();
+            renderCalculatorList();
+            renderCaseDrawerContent();
+        };
+    </script>
+</body>
+noir_tech_academy (1).html
